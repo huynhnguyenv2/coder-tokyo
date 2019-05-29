@@ -8,6 +8,7 @@ const FileSync = require('lowdb/adapters/FileSync')
 const adapter = new FileSync('db.json')
 const db = low(adapter)
 
+const shortid = require('shortid');
 
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
@@ -48,15 +49,16 @@ app.get('/users/create', function(req, res){
 });
 
 app.get('/users/:id',function(req,res){
-	var id = parseInt(req.params.id);
+	var id = req.params.id;
   //console.log(id)
-	var user = db.get('users').find({id : id});
+	var user = db.get('users').find({id : id}).value();
   //console.log(user);
 	res.render('users/view',{
 		user: user
 	})
 })
 app.post('/users/create', function(req, res){
+  req.body.id = shortid.generate()
 	db.get('users').push(req.body).write();
 	res.redirect('/users');
 });
