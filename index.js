@@ -10,6 +10,7 @@ app.use(express.urlencoded({ extended: true })) // for parsing application/x-www
 app.set('view engine', 'pug');
 app.set('views', './views');
 
+app.use(express.static('public'));
 
 
 app.get('/', function(request, respond){
