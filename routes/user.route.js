@@ -1,14 +1,10 @@
 const express = require('express');
 const controller = require('../controllers/user.controller');
 const valUser = require("../validates/validate.user");
+const authMiddleware = require("../middlewares/auth.middlewares")
 const router  = express.Router();
 
-router.get('/', controller.index);
-
-router.get('/cookie', function(req, res){
-  res.cookie('user-id', 12345);
-  res.send("OK");
-});
+router.get('/', authMiddleware.requireAuth ,controller.index);
 
 router.get('/search', controller.search);
 
