@@ -15,8 +15,27 @@ html
               span.sr-only (current)
           li.nav-item
             a.nav-link(href='/users') Users
+          li.nav-item
+            a.nav-link(href='/products') Products
+          li.nav-item
+            a.nav-link(href='/cart') Cart
       if user      
         p= user.name
+    
 
     .container  
       block content
+      if cart 
+        p In Cart
+        p= cart.item
+        each temp in cart.details
+          table.table
+            tr 
+              th Name
+              th Desciption
+              th Avatar
+            tr 
+              td= temp.name
+              td= temp.desciption
+              td
+                img(src= temp.image, width="32px")
