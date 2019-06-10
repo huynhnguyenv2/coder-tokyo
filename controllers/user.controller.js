@@ -1,39 +1,51 @@
-const express = require('express');
-const shortid = require('shortid');
-const db = require('../db');
+const md5 = require('md5');
+const User = require('../models/user.model');
 
 module.exports.index = function(req,res){
-	res.render('users/index', {
-		users: db.get('users').value()
-	});
-};
-module.exports.search = function(req, res){
-	var q = req.query.q;
-	var users = db.get('users').value();
-	var matchedUsers = users.filter(function(user){
-		 return user.name.indexOf(q) !== -1
+	User.find().then(function(users){
+		res.render('users/index', {
+			users: users
 		});
+	})
+	
+};
+module.exports.search = async function(req, res){
+	let q = req.query.q;
+
+	let users = await User.find()
+
+	let matchedUsers = users.filter(function(user){
+	 	return user.name.indexOf(q) !== -1
+	});
 	
 	res.render('users/index', {
 		users: matchedUsers
 	})
 };
 module.exports.create = function(req, res){
-  //console.log(req.cookies);
 	res.render('users/create')
 };
-module.exports.get = function(req,res){
-	var id = req.params.id;
-  //console.log(id)
-	var user = db.get('users').find({id : id}).value();
-  //console.log(user);
+module.exports.get = async function(req,res){
+	let id = req.params.id;
+	let user = await User.findById(id)
+
 	res.render('users/view',{
 		user: user
 	})
 };
-module.exports.postCreate = function(req, res){
-  req.body.id = shortid.generate();
-	req.body.avatar = req.file.path.split('/').slice(1).join('/');
-	db.get('users').push(req.body).write();
-	res.redirect('/users');
+module.exports.postCreate = async function(req, res, next){
+	try {	
+		req.body.avatar = req.file.path.split('/').slice(1).join('/');
+		let user = new User({
+			name: req.body.name,
+			email: req.body.email,
+			phone: req.body.phone,
+			password: md5(req.body.password),
+			avatar: req.body.avatar
+		});
+		await user.save();
+		res.redirect('/users');
+	} catch (error) {
+		next(error);	
+	}
 };

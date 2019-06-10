@@ -1,17 +1,27 @@
-var db = require('../db');
-module.exports.addToCart = function(req, res, next){
+const Session = require('../models/session.model');
+
+module.exports.addToCart = async function(req, res){
   var productId = req.params.productId;
   var sessionId = req.signedCookies.sessionId;
   if(!sessionId){
     res.redirect('/products');
     return
   }
-  var count = db.get('sessions').find({
-    id: sessionId
-  }).get('cart.' + productId, 0).value()
-  db.get("sessions").find({
-    id: sessionId
-  }).set('cart.' + productId, count + 1).write();
+
+  let count = await Session.findOne({
+    ident: sessionId
+  });
+  
+  if(!count.cart || !count.cart[productId]) {
+    count.cart = {[productId]: 1}
+    
+  }
+  else {
+    let c = count.cart[productId] ;
+    count.cart = {[productId]: ++c};
+  }
+  await count.save();
 
   res.redirect('/products');
+
 }

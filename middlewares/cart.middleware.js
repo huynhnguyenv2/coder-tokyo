@@ -1,24 +1,32 @@
-var db = require("../db");
 
-module.exports = function(req, res, next){
-  var sessionId = req.signedCookies.sessionId;
+const Session = require("../models/session.model");
+const Product = require("../models/product.model");
+module.exports = async function(req, res, next){
+  try {
+    var sessionId = req.signedCookies.sessionId;
+    let item = await Session.findOne({
+      ident: sessionId
+    });
 
-  var item = db.get("sessions").find({
-    id: sessionId
-  }).value().cart;
-  var total = Object.values(item).reduce( (a,b) => a + b);
-  var temp = [] ;
-  Object.keys(item).forEach(function(i){
-    return temp.push(db.get("products").find({
-      id: i
-    }).value())
-  });
+    if(item.cart !== undefined){
+      let t = item.cart;
+      var total = Object.values(t).reduce( (a,b) => a + parseInt(b), 0);
+      var temp = [] ;
+      Object.keys(t).forEach(function(i){
+        Product.findById(i).then(function(x){ 
+          temp.push(x)
+        })
+      });
 
-  var objCart = {
-    sum: total,
-    details: temp
+      var objCart = {
+        sum: total,
+        details: temp 
+      }
+      res.locals.cart = objCart;
+    }
+    else res.locals.cart = false;
+    next();
+  } catch (error) {   
+    next(error);
   }
-  res.locals.cart = objCart;
-
-  next();
 }

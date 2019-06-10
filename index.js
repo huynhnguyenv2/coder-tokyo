@@ -1,15 +1,24 @@
 require('dotenv').config();
 
 const express = require('express');
-const db = require("./db");
+const cookieParser = require('cookie-parser');
+const mongoose = require('mongoose');
 const userRoutes = require('./routes/user.route');
 const authRoutes = require('./routes/auth.route');
-const cookieParser = require('cookie-parser');
+const productRoutes = require('./routes/product.route');
+const cartRoutes = require('./routes/cart.route');
+
 const authMiddleware= require("./middlewares/auth.middlewares");
 const sessionMiddleware = require('./middlewares/session.middleware');
-const cartMiddleware = require('./middlewares/cart.middleware')
-const productRoutes = require('./routes/product.route');
-const cartRoutes = require('./routes/cart.route')
+const cartMiddleware = require('./middlewares/cart.middleware');
+
+//Set up mongoose connection 
+const dev_db_url = "mongodb://admin:admin123@localhost:27017/express-demo?authSource=admin";
+let mongoDB = process.env.MONGODB_URI || dev_db_url;
+mongoose.connect(mongoDB, { useNewUrlParser: true });
+let db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+//////
 
 const port = 3000;
 const app = express();
