@@ -20,7 +20,7 @@ let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 //////
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 const app = express();
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
